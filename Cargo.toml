@@ -1,5 +1,6 @@
 [workspace]
 resolver = "3"
 members = [
-    "metal/compute_add"
+    "metal/compute_add", 
+    "windowing/winit_minimal"
 ]
