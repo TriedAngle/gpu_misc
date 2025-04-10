@@ -1,4 +1,4 @@
-use cocoa::appkit::{NSView, NSWindow};
+use cocoa::appkit::NSView;
 use cocoa::base::id as cocoa_id;
 use metal::*;
 use objc::rc::autoreleasepool;
@@ -14,18 +14,16 @@ use winit::{
     window::{Window, WindowId},
 };
 
-// Define vertex struct and buffer indices
 #[repr(C)]
 #[derive(Clone, Copy)]
 struct AAPLVertex {
-    position: [f32; 2], // 2D position
-    color: [f32; 4],    // RGBA color
+    position: [f32; 2],
+    color: [f32; 4],
 }
 
 const AAPL_VERTEX_INPUT_INDEX_VERTICES: u64 = 0;
-const AAPL_VERTEX_INPUT_INDEX_VIEWPORT_SIZE: u64 = 1; // Index for viewport size buffer
+const AAPL_VERTEX_INPUT_INDEX_VIEWPORT_SIZE: u64 = 1;
 
-// MetalState manages Metal resources and rendering
 struct MetalState {
     window: Arc<Window>,
     device: Device,
@@ -45,7 +43,9 @@ impl MetalState {
         layer.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
         layer.set_presents_with_transaction(false);
         unsafe {
-            if let Ok(RawWindowHandle::AppKit(rw)) = window.window_handle().map(|wh| wh.as_raw()) {
+            if let Ok(RawWindowHandle::AppKit(rw)) =
+                window.window_handle().map(|wh| wh.as_raw())
+            {
                 let view = rw.ns_view.as_ptr() as cocoa_id;
                 view.setWantsLayer(true);
                 view.setLayer(<*mut _>::cast(layer.as_mut()));
@@ -55,7 +55,10 @@ impl MetalState {
         let command_queue = device.new_command_queue();
 
         let library = device
-            .new_library_with_source(include_str!("shaders.metal"), &CompileOptions::new())
+            .new_library_with_source(
+                include_str!("shaders.metal"),
+                &CompileOptions::new(),
+            )
             .expect("Failed to create shader library");
 
         let vertex_function = library
@@ -68,7 +71,8 @@ impl MetalState {
         let pipeline_state_descriptor = RenderPipelineDescriptor::new();
         pipeline_state_descriptor.set_label("Simple Pipeline");
         pipeline_state_descriptor.set_vertex_function(Some(&vertex_function));
-        pipeline_state_descriptor.set_fragment_function(Some(&fragment_function));
+        pipeline_state_descriptor
+            .set_fragment_function(Some(&fragment_function));
         let color_attachment = pipeline_state_descriptor
             .color_attachments()
             .object_at(0)
@@ -77,12 +81,14 @@ impl MetalState {
 
         let vertex_descriptor = VertexDescriptor::new();
 
-        let position_attribute = vertex_descriptor.attributes().object_at(0).unwrap();
+        let position_attribute =
+            vertex_descriptor.attributes().object_at(0).unwrap();
         position_attribute.set_format(MTLVertexFormat::Float2);
         position_attribute.set_offset(0);
         position_attribute.set_buffer_index(AAPL_VERTEX_INPUT_INDEX_VERTICES);
 
-        let color_attribute = vertex_descriptor.attributes().object_at(1).unwrap();
+        let color_attribute =
+            vertex_descriptor.attributes().object_at(1).unwrap();
         color_attribute.set_format(MTLVertexFormat::Float4);
         color_attribute.set_offset(8);
         color_attribute.set_buffer_index(AAPL_VERTEX_INPUT_INDEX_VERTICES);
@@ -94,7 +100,8 @@ impl MetalState {
         layout.set_stride(size_of::<AAPLVertex>() as u64);
         layout.set_step_rate(1);
         layout.set_step_function(MTLVertexStepFunction::PerVertex);
-        pipeline_state_descriptor.set_vertex_descriptor(Some(&vertex_descriptor));
+        pipeline_state_descriptor
+            .set_vertex_descriptor(Some(&vertex_descriptor));
 
         let pipeline_state = device
             .new_render_pipeline_state(&pipeline_state_descriptor)
@@ -165,12 +172,13 @@ impl MetalState {
                     .unwrap();
                 color_attachment.set_texture(Some(drawable.texture()));
                 color_attachment.set_load_action(MTLLoadAction::Clear);
-                color_attachment.set_clear_color(MTLClearColor::new(0.0, 0.5, 0.7, 1.0)); // Cyan background
+                color_attachment
+                    .set_clear_color(MTLClearColor::new(0.0, 0.5, 0.7, 1.0));
                 color_attachment.set_store_action(MTLStoreAction::Store);
 
                 let command_buffer = self.command_queue.new_command_buffer();
-                let render_encoder =
-                    command_buffer.new_render_command_encoder(&render_pass_descriptor);
+                let render_encoder = command_buffer
+                    .new_render_command_encoder(&render_pass_descriptor);
 
                 let viewport = MTLViewport {
                     originX: 0.0,
@@ -196,7 +204,11 @@ impl MetalState {
                     0,
                 );
 
-                render_encoder.draw_primitives(MTLPrimitiveType::Triangle, 0, 3);
+                render_encoder.draw_primitives(
+                    MTLPrimitiveType::Triangle,
+                    0,
+                    3,
+                );
                 render_encoder.end_encoding();
 
                 command_buffer.present_drawable(&drawable);
@@ -227,7 +239,9 @@ impl ApplicationHandler for App {
                 .create_window(
                     Window::default_attributes()
                         .with_title("Metal Triangle with Buffers")
-                        .with_inner_size(winit::dpi::LogicalSize::new(800.0, 600.0)),
+                        .with_inner_size(winit::dpi::LogicalSize::new(
+                            800.0, 600.0,
+                        )),
                 )
                 .unwrap(),
         );
@@ -237,7 +251,12 @@ impl ApplicationHandler for App {
         self.window = Some(window);
     }
 
-    fn window_event(&mut self, event_loop: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
+    fn window_event(
+        &mut self,
+        event_loop: &ActiveEventLoop,
+        _id: WindowId,
+        event: WindowEvent,
+    ) {
         if let Some(metal_state) = &self.metal_state {
             match event {
                 WindowEvent::CloseRequested => event_loop.exit(),

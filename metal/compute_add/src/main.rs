@@ -14,11 +14,14 @@ fn main() {
 
         let buffer_size = (array_length * size_of::<f32>()) as u64;
 
-        let buffer_a = device.new_buffer(buffer_size, MTLResourceOptions::StorageModeShared);
+        let buffer_a = device
+            .new_buffer(buffer_size, MTLResourceOptions::StorageModeShared);
 
-        let buffer_b = device.new_buffer(buffer_size, MTLResourceOptions::StorageModeShared);
+        let buffer_b = device
+            .new_buffer(buffer_size, MTLResourceOptions::StorageModeShared);
 
-        let result_buffer = device.new_buffer(buffer_size, MTLResourceOptions::StorageModeShared);
+        let result_buffer = device
+            .new_buffer(buffer_size, MTLResourceOptions::StorageModeShared);
 
         generate_random_float_data(&buffer_a, array_length);
         generate_random_float_data(&buffer_b, array_length);
@@ -52,7 +55,8 @@ fn main() {
         };
 
         let threadgroup_size = {
-            let max_threads = pipeline_state.max_total_threads_per_threadgroup();
+            let max_threads =
+                pipeline_state.max_total_threads_per_threadgroup();
             let width = if max_threads > array_length as u64 {
                 array_length as u64
             } else {
