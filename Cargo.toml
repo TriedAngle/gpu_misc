@@ -1,6 +1,14 @@
 [workspace]
 resolver = "3"
 members = [
-    "metal/compute_add", 
+    "metal/compute_add",
+    "metal/raster_triangle", 
     "windowing/winit_minimal"
 ]
+
+[workspace.dependencies]
+winit = "0.30.9"
+metal = "0.32.0"
+objc2 = "0.6.0"
+cocoa = "0.26.0"
+rand = "0.9.0"

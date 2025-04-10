@@ -1,0 +1,10 @@
+[package]
+name = "raster_triangle"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+winit = { workspace = true }
+metal = { workspace = true }
+objc2 = { workspace = true }
+cocoa = { workspace = true }
